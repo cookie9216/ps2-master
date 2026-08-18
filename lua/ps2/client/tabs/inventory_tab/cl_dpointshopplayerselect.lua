@@ -39,6 +39,7 @@ function PANEL:AddPlayer( ply )
 	end
 	
 	function panel.DoClick( )
+		if not IsValid( ply ) then return end
 		self:SelectPlayer( ply )
 	end
 	
@@ -51,11 +52,15 @@ function PANEL:SetPlayers( tblPlayers )
 end
 
 function PANEL:SelectPlayer( ply )
+	if not IsValid( ply ) then
+		return
+	end
 	if IsValid( self.selectedPanel ) and ply == self.selectedPanel.player then
 		return 
 	end
 	
 	for k, v in pairs( self.playerLookup ) do
+		if not IsValid( v ) then continue end
 		local isSelected = v.player == ply
 		v.Selected = isSelected
 		if isSelected then
@@ -66,12 +71,16 @@ function PANEL:SelectPlayer( ply )
 end
 
 function PANEL:RemovePanelFor( ply )
-	if self.playerLookup[ply].Selected then
-		self.selectedPanel = nil
-		self:OnChange( )
+	local panel = self.playerLookup[ply]
+	if not IsValid( panel ) then
+		self.playerLookup[ply] = nil
+		return
 	end
-	
-	self.playerLookup[ply]:Remove( )
+	if panel.Selected then
+		self.selectedPanel = nil
+		self:OnChange( nil )
+	end
+	panel:Remove( )
 	self.playerLookup[ply] = nil
 	self.playersContainer:InvalidateLayout( )
 end
@@ -83,13 +92,21 @@ function PANEL:InvalidatePlayerTable( )
 			not table.HasValue( self.players, v.player ) 
 		then
 			v:Remove( )
-			self.playerLookup[v] = nil
+			if IsValid( v.player ) then
+				self.playerLookup[v.player] = nil
+			else
+				for ply, panel in pairs( self.playerLookup ) do
+					if panel == v or not IsValid( ply ) then
+						self.playerLookup[ply] = nil
+					end
+				end
+			end
 		end
 	end
 	
 	--Add added
 	for k, v in pairs( self.players ) do
-		if not IsValid( self.playerLookup[v] ) then
+		if IsValid( v ) and not IsValid( self.playerLookup[v] ) then
 			self:AddPlayer( v )
 		end
 	end

@@ -290,37 +290,52 @@ end
 local function initPlayer( ply )
     KLogf( 5, "[PS2] initPlayer(%s), modules loaded: %s", ply:Nick( ), getPromiseState( Pointshop2.ModuleItemsLoadedPromise ) )
     local controller = Pointshop2Controller:getInstance( )
+    local joinResourceGap = 0.75
 
     Pointshop2.DatabaseConnectedPromise:Fail( function( err )
         print("DB Faled", err)
-        if ply:IsAdmin( ) then
-            timer.Simple( 2, function( )
-                ply:PS2_DisplayError( "[CRITICAL][ADMIN ONLY] Your MySQL/Server configuration is faulty. (" .. err .. "). Please fix these errors. Other parts of your server can be affected by errors if this is not fixed.", 1000 )
-            end )
-        end
+        timer.Simple( 2, function( )
+            if not IsValid( ply ) or not ply:IsAdmin( ) then return end
+            ply:PS2_DisplayError( "[CRITICAL][ADMIN ONLY] Your MySQL/Server configuration is faulty. (" .. err .. "). Please fix these errors. Other parts of your server can be affected by errors if this is not fixed.", 1000 )
+        end )
     end )
 
-    Pointshop2.OutfitsLoadedPromise:Then( function( )
-        controller:SendInitialOutfitPackage( ply )
-    end )
-    Pointshop2.SettingsLoadedPromise:Then( function( )
-        controller:SendInitialSettingsPackage( ply )
-    end )
-    Pointshop2.ModuleItemsLoadedPromise:Then( function( )
-        controller:sendDynamicInfo( ply )
-        return WhenAllFinished{
-            ply.dynamicsReceivedPromise:Promise(),
-            controller:sendWallet( ply )
-        }
-    end ):Done( function( )
-        --TODO: Make a proper promise/transaction for this
+    local function afterDynamicsLoaded( )
         timer.Simple( 2, function( )
+            if not IsValid( ply ) then return end
             WhenAllFinished{ controller:initializeInventory( ply ),
                 controller:initializeSlots( ply ),
                 ply.outfitsReceivedPromise
             }:Done( function( )
+                if not IsValid( ply ) then return end
                 controller:sendActiveEquipmentTo( ply )
                 hook.Run("PS2_PlayerFullyLoaded", ply)
+            end )
+        end )
+    end
+
+    Pointshop2.ModuleItemsLoadedPromise:Then( function( )
+        if not IsValid( ply ) then return end
+        timer.Simple( joinResourceGap, function( )
+            if not IsValid( ply ) then return end
+            Pointshop2.OutfitsLoadedPromise:Then( function( )
+                if not IsValid( ply ) then return end
+                controller:SendInitialOutfitPackage( ply )
+            end )
+            timer.Simple( joinResourceGap, function( )
+                if not IsValid( ply ) then return end
+                Pointshop2.SettingsLoadedPromise:Then( function( )
+                    if not IsValid( ply ) then return end
+                    controller:SendInitialSettingsPackage( ply )
+                end )
+                timer.Simple( joinResourceGap, function( )
+                    if not IsValid( ply ) then return end
+                    controller:sendDynamicInfo( ply )
+                    return WhenAllFinished{
+                        ply.dynamicsReceivedPromise:Promise(),
+                        controller:sendWallet( ply )
+                    }:Done( afterDynamicsLoaded )
+                end )
             end )
         end )
     end )

@@ -1,0 +1,30 @@
+--- /tmp/tmp.2S5MPfCRGI/lua/ps2/client/icons/cl_dpointshopitemicon.lua	2025-12-01 09:58:12.000000000 +0000
++++ /home/cookie/gmod/serverfiles/garrysmod/addons/0020_ps2-master/lua/ps2/client/icons/cl_dpointshopitemicon.lua	2026-08-18 16:45:35.712544011 +0000
+@@ -157,10 +157,10 @@
+ end
+ 
+ function PANEL:Select( )
+-	print("PANEL:Select()")
+-    if self.noSelect then
+-        return
+-    end
++	-- change by cookie9216
++	if self.noSelect then
++		return
++	end
+ 
+     self.Selected = true
+     hook.Run( "PS2_ItemIconSelected", self, self.item or self.itemClass )
+@@ -182,6 +182,11 @@
+     return true
+ end
+ 
+-Derma_Hook( PANEL, "Paint", "Paint", "PointshopItemIcon" )
++function PANEL:Paint( w, h )
++	-- change by cookie9216
++	if Pointshop2 and Pointshop2.DrawItemTileBackground then
++		Pointshop2.DrawItemTileBackground( w, h, Pointshop2.IsTileHovered( self ) )
++	end
++end
+ 
+ derma.DefineControl( "DPointshopItemIcon", "", PANEL, "DPanel" )

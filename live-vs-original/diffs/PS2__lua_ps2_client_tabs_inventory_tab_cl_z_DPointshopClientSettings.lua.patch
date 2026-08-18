@@ -1,0 +1,39 @@
+--- /tmp/tmp.2S5MPfCRGI/lua/ps2/client/tabs/inventory_tab/cl_z_DPointshopClientSettings.lua	2025-12-01 09:58:12.000000000 +0000
++++ /home/cookie/gmod/serverfiles/garrysmod/addons/0020_ps2-master/lua/ps2/client/tabs/inventory_tab/cl_z_DPointshopClientSettings.lua	2026-08-18 16:45:35.718544579 +0000
+@@ -35,9 +35,34 @@
+ 	self.saveButton:PerformLayout( )
+ 	self.saveButton:Paint( 10, 10 )
+ 	function self.saveButton.DoClick( )
+-		Pointshop2.ClientSettings.SaveSettings( self.actualSettings.settings )
++		-- change by cookie9216
++		local collected = self.actualSettings.CollectSettings
++			and self.actualSettings:CollectSettings()
++			or self.actualSettings.settings
++
++		local ok = Pointshop2.ClientSettings.SaveSettings( collected )
+ 		Pointshop2.ClientSettings.LoadSettings( )
+-		Derma_Message( "Your settings have been saved. Some settings may require a reconnect to apply." )
++
++		if IsValid( self.actualSettings ) then
++			self.actualSettings:SetData( Pointshop2.ClientSettings.Settings )
++		end
++
++		local lang = GetConVar("gmod_language")
++		local german = lang and (string.lower(lang:GetString() or "en") == "de" or string.sub(string.lower(lang:GetString() or "en"), 1, 3) == "de-")
++		if ok == false then
++			Derma_Message(
++				german and "Einstellungen konnten nicht gespeichert werden." or "Your settings could not be saved.",
++				"Local Settings",
++				"OK"
++			)
++		else
++			Derma_Message(
++				german and "Einstellungen gespeichert. Manche Optionen greifen erst nach Reconnect."
++					or "Your settings have been saved. Some settings may require a reconnect to apply.",
++				"Local Settings",
++				"OK"
++			)
++		end
+ 	end
+ 
+ 	self.infoPanel = vgui.Create( "DInfoPanel", self.scroll )

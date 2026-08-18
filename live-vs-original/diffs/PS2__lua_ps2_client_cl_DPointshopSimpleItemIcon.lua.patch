@@ -1,0 +1,64 @@
+--- /tmp/tmp.2S5MPfCRGI/lua/ps2/client/cl_DPointshopSimpleItemIcon.lua	2025-12-01 09:58:12.000000000 +0000
++++ /home/cookie/gmod/serverfiles/garrysmod/addons/0020_ps2-master/lua/ps2/client/cl_DPointshopSimpleItemIcon.lua	2026-08-18 16:45:35.710543821 +0000
+@@ -16,21 +16,14 @@
+ end
+ 
+ function PANEL:Paint( w, h )
+-	self.lbl:SetText( self.itemClass:GetPrintName( )[1] )
+-	local persistenceFactor = ( isnumber( self.itemClass._persistenceId ) and self.itemClass._persistenceId or 0  )
+-	self.value = util.CRC( self.itemClass:GetPrintName( ) )
+-	math.randomseed( self.value * persistenceFactor )
+-	for i = 0, 10 do math.random( ) end
+-	
+-	local comp1 = math.random( ) * 360
+-	local comp2 = math.random( ) / 2 + 0.3
+-	local color = HSVToColor( comp1, 1, comp2 )
+-	
+-	if self.Selected or self.Hovered or self:IsChildHovered( 2 ) then
+-		draw.RoundedBox( 6, 0, 0, w, h, self:GetSkin( ).Highlight )
+-		draw.RoundedBox( 6, 2, 2, w - 4, h - 4, color )
+-	else
+-		draw.RoundedBox( 6, 0, 0, w, h, color )
++	-- change by cookie9216
++	if Pointshop2 and Pointshop2.DrawItemTileBackground then
++		Pointshop2.DrawItemTileBackground( w, h, Pointshop2.IsTileHovered( self ) )
++	end
++	if IsValid( self.lbl ) and self.itemClass and self.itemClass.GetPrintName then
++		local txt = self.itemClass:GetPrintName( )
++		self.lbl:SetText( txt and txt[1] or "" )
++		self.lbl:SetTextColor( color_white )
+ 	end
+ end
+ 
+@@ -51,23 +44,14 @@
+ 
+ 
+ function PANEL:Paint( w, h )
+-	self.lbl:SetText( self.item:GetPrintName( )[1] )
+-	local persistenceFactor = ( isnumber( self.itemClass._persistenceId ) and self.itemClass._persistenceId or 0  )
+-	self.value = util.CRC( self.item:GetPrintName( ) )
+-	math.randomseed( self.value * persistenceFactor )
+-	for i = 0, 10 do math.random( ) end
+-	
+-	local comp1 = math.random( ) * 360
+-	local comp2 = math.random( ) / 2 + 0.3
+-	local color = HSVToColor( comp1, 1, comp2 )
+-	surface.SetDrawColor( color )
+-	surface.DrawRect( 0, 0, w, h ) 
+-	do return end
+-	if self.Selected or self.Hovered or self:IsChildHovered( 2 ) then
+-		draw.RoundedBox( 6, 0, 0, w, h, self:GetSkin( ).Highlight )
+-		draw.RoundedBox( 6, 2, 2, w - 4, h - 4, color )
+-	else
+-		draw.RoundedBox( 6, 0, 0, w, h, color )
++	-- change by cookie9216
++	if Pointshop2 and Pointshop2.DrawItemTileBackground then
++		Pointshop2.DrawItemTileBackground( w, h, Pointshop2.IsTileHovered( self ) )
++	end
++	if IsValid( self.lbl ) and self.item and self.item.GetPrintName then
++		local txt = self.item:GetPrintName( )
++		self.lbl:SetText( txt and txt[1] or "" )
++		self.lbl:SetTextColor( color_white )
+ 	end
+ end
+ 

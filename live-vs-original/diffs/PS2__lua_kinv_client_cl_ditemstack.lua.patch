@@ -1,0 +1,34 @@
+--- /tmp/tmp.2S5MPfCRGI/lua/kinv/client/cl_ditemstack.lua	2025-12-01 09:58:12.000000000 +0000
++++ /home/cookie/gmod/serverfiles/garrysmod/addons/0020_ps2-master/lua/kinv/client/cl_ditemstack.lua	2026-08-18 16:45:35.706543442 +0000
+@@ -185,7 +185,30 @@
+ 
+ function PANEL:Think( )
+ 	if not IsValid( self.icon ) and self.items[1] then
+-		self.icon = self.items[1]:getCrashsafeIcon( )
++		-- change by cookie9216
++		local item = self.items[1]
++		local icon
++		if item.getCrashsafeIcon then
++			icon = item:getCrashsafeIcon( )
++		elseif item.getIcon then
++			icon = item:getIcon( )
++		end
++
++		if not IsValid( icon ) then
++			if not self._missingIconLogged then
++				self._missingIconLogged = true
++				local className = item.class and item.class.className or "unknown"
++				ErrorNoHalt( "[KInventory] Missing icon for item class: " .. tostring( className ) .. "\n" )
++			end
++			icon = vgui.Create( "DPanel" )
++			icon:SetSize( 64, 64 )
++			function icon:Paint( w, h )
++				surface.SetDrawColor( 40, 40, 40, 200 )
++				surface.DrawRect( 0, 0, w, h )
++			end
++		end
++
++		self.icon = icon
+ 		self.icon:SetParent( self )
+ 		self.icon.stackPanel = self
+ 		self.icon:SetDragParent( self )

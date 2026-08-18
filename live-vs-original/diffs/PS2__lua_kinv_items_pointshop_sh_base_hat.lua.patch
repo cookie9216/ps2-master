@@ -1,0 +1,104 @@
+--- /tmp/tmp.2S5MPfCRGI/lua/kinv/items/pointshop/sh_base_hat.lua	2025-12-01 09:58:12.000000000 +0000
++++ /home/cookie/gmod/serverfiles/garrysmod/addons/0020_ps2-master/lua/kinv/items/pointshop/sh_base_hat.lua	2026-08-18 16:45:35.708543632 +0000
+@@ -12,6 +12,38 @@
+ end
+ 
+ if CLIENT then
++	-- change by cookie9216
++	local function rewriteOutfitUniqueIds(part, prefix, path)
++		if not istable(part) then return end
++		path = path or "root"
++		if istable(part.self) then
++			for key, val in pairs(part.self) do
++				if val ~= "" and (key == "UniqueID" or string.sub(key, -3) == "UID") then
++					part.self[key] = util.CRC(prefix .. ":" .. path .. ":" .. tostring(key) .. ":" .. tostring(val))
++				end
++			end
++		end
++		for childKey, child in pairs(part.children or {}) do
++			rewriteOutfitUniqueIds(child, prefix, path .. "." .. tostring(childKey))
++		end
++		for childKey, child in pairs(part) do
++			if childKey ~= "self" and childKey ~= "children" and istable(child) then
++				rewriteOutfitUniqueIds(child, prefix, path .. "." .. tostring(childKey))
++			end
++		end
++	end
++
++	function ITEM:BuildPACOutfitForOwner(ply, outfit, outfitId)
++		if not istable(outfit) then return nil end
++		local cloned = table.Copy(outfit)
++		local ownerKey = IsValid(ply) and tostring(ply:EntIndex()) or "unknown"
++		local itemKey = tostring(self.id or self.className or self.PrintName or "item")
++		local outfitKey = tostring(outfitId or "outfit")
++		local prefix = "ps2:" .. ownerKey .. ":" .. itemKey .. ":" .. outfitKey
++		rewriteOutfitUniqueIds(cloned, prefix)
++		return cloned
++	end
++
+ 	function ITEM:AttachOutfit( )
+ 		local ply = self:GetOwner( )
+ 		if not IsValid(ply) then
+@@ -33,10 +65,18 @@
+ 			ply:SetShowPACPartsInEditor( false )
+ 		end
+ 
++		-- change by cookie9216
++		if self.attached then
++			self:RemoveOutfit( )
++		end
+ 		local outfit, id = self:getOutfitForModel( ply:GetModel() )
++		outfit = self:BuildPACOutfitForOwner(ply, outfit, id)
++		if not outfit then
++			return
++		end
+ 		self.outfit = outfit
+ 		self.model = ply:GetModel()
+-		ply:AttachPACPart( outfit, ply )
++		ply:AttachPACPart( outfit, ply, true )
+ 		self.attached = true
+ 	end
+ 
+@@ -44,26 +84,37 @@
+ 		self.attached = false
+ 
+ 		local ply = self:GetOwner()
+-		if not ply.RemovePACPart then
++		-- change by cookie9216
++		if not IsValid(ply) or not ply.RemovePACPart then
++			self.outfit = nil
+ 			return
+ 		end
+ 
+-		local outfit = self.outfit or self.class.getOutfitForModel( ply:GetModel() )
+-		ply:RemovePACPart( outfit )
++		local outfit = self.outfit
++		if not istable(outfit) then
++			local rawOutfit, outfitId = self.class.getOutfitForModel( ply:GetModel() )
++			outfit = self:BuildPACOutfitForOwner(ply, rawOutfit, outfitId)
++		end
++		if istable(outfit) then
++			ply:RemovePACPart( outfit, true )
++		end
++		self.outfit = nil
+ 	end
+ 
+ 	-- Monitor Model Changes
+ 	function ITEM:Think( )
+-		if not self.outfit or not self.model or not IsValid( self:GetOwner( ) ) then
++		-- change by cookie9216
++		if not IsValid( self:GetOwner( ) ) then
+ 			return
+ 		end
+ 
+-		if self.model != self:GetOwner( ):GetModel( ) then
++		if self.outfit and self.model and self.model != self:GetOwner( ):GetModel( ) then
+ 			self:RemoveOutfit( )
+ 			self:AttachOutfit( )
+ 		end
+ 
+ 		local shouldShow = not ( hook.Run( "PS2_VisualsShouldShow", self:GetOwner( ) ) == false )
++			and not Pointshop2.ClientSettings.GetSetting( "BasicSettings.VisualsDisabled" )
+ 		if shouldShow != self.attached then
+ 			if shouldShow then
+ 				self:AttachOutfit( )

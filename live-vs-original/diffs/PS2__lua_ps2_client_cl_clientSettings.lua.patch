@@ -1,0 +1,62 @@
+--- /tmp/tmp.2S5MPfCRGI/lua/ps2/client/cl_clientSettings.lua	2025-12-01 09:58:12.000000000 +0000
++++ /home/cookie/gmod/serverfiles/garrysmod/addons/0020_ps2-master/lua/ps2/client/cl_clientSettings.lua	2026-08-18 16:45:35.710543821 +0000
+@@ -34,12 +34,42 @@
+ }
+ 
+ function Pointshop2.ClientSettings.SaveSettings( settings )
+-	Pointshop2.ClientSettings.Settings = settings
+-	file.Write( "pointshop2-settings.txt", util.TableToJSON( settings ) )
++	-- change by cookie9216
++	local function normalizeStoredValue( value )
++		if value == "true" then return true end
++		if value == "false" then return false end
++		return value
++	end
++
++	local copy = {}
++	if istable( settings ) then
++		for k, v in pairs( settings ) do
++			copy[k] = normalizeStoredValue( v )
++		end
++	end
++
++	Pointshop2.ClientSettings.Settings = copy
++	file.CreateDir( "pointshop2" )
++	local encoded = util.TableToJSON( copy, true )
++	if not encoded then
++		ErrorNoHalt( "[PS2] Failed to encode client settings.\n" )
++		return false
++	end
++	file.Write( "pointshop2/client_settings.json", encoded )
++	file.Write( "pointshop2-settings.txt", encoded )
++	return true
+ end
+ 
+ function Pointshop2.ClientSettings.LoadSettings( )
+-	local settings = util.JSONToTable( file.Read( "pointshop2-settings.txt" ) or "{}" )
++	-- change by cookie9216
++	local raw = file.Read( "pointshop2/client_settings.json", "DATA" )
++		or file.Read( "pointshop2-settings.txt", "DATA" )
++		or "{}"
++	local settings = util.JSONToTable( raw ) or {}
++	for k, v in pairs( settings ) do
++		if v == "true" then settings[k] = true end
++		if v == "false" then settings[k] = false end
++	end
+ 	
+ 	Pointshop2.ClientSettings.Settings = {}
+ 	Pointshop2.recursiveSettingsInitialize( Pointshop2.ClientSettings.SettingsTable, settings, Pointshop2.ClientSettings.Settings )
+@@ -49,7 +79,12 @@
+ end
+ 
+ function Pointshop2.ClientSettings.GetSetting( path )
+-	return Pointshop2.ClientSettings.Settings[path]
++	-- change by cookie9216
++	local settings = Pointshop2.ClientSettings.Settings
++	if not istable( settings ) then
++		return nil
++	end
++	return settings[path]
+ end
+ 
+ hook.Add( "PS2_ClientSettingsUpdated", "UpdatePACConvars", function( )

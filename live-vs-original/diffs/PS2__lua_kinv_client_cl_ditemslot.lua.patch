@@ -1,0 +1,43 @@
+--- /tmp/tmp.2S5MPfCRGI/lua/kinv/client/cl_ditemslot.lua	2025-12-01 09:58:12.000000000 +0000
++++ /home/cookie/gmod/serverfiles/garrysmod/addons/0020_ps2-master/lua/kinv/client/cl_ditemslot.lua	2026-08-18 16:45:35.706543442 +0000
+@@ -68,20 +68,27 @@
+ end
+ 
+ function PANEL:Paint( w, h )
+-    surface.SetDrawColor( 50, 50, 50 )
+-    surface.DrawRect( 0, 0, w, h )
++	-- change by cookie9216
++	if Pointshop2 and Pointshop2.DrawItemSlotBackground then
++		Pointshop2.DrawItemSlotBackground( self, w, h )
++	else
++		surface.SetDrawColor( 50, 50, 50 )
++		surface.DrawRect( 0, 0, w, h )
++		if self.Dragging then
++			surface.SetDrawColor( 40, 40, 40 )
++			surface.DrawRect( 0, 0, w, h )
++		end
++	end
+ 
+-    if self.Dragging then
+-        surface.SetDrawColor( 40, 40, 40 )
+-        surface.DrawRect( 0, 0, w, h )
+-    end
+-
+-    self.key = -1
+-    for k, v in pairs( self:GetParent( ):GetChildren( ) ) do
+-        if v == self then
+-            self.key = k
+-        end
+-    end
++	self.key = -1
++	local parent = self:GetParent( )
++	if IsValid( parent ) then
++		for k, v in pairs( parent:GetChildren( ) ) do
++			if v == self then
++				self.key = k
++			end
++		end
++	end
+ end
+ 
+ --Called when item is removed externally

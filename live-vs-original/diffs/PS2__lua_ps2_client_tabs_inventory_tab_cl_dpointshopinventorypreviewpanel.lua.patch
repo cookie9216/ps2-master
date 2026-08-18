@@ -1,0 +1,18 @@
+--- /tmp/tmp.2S5MPfCRGI/lua/ps2/client/tabs/inventory_tab/cl_dpointshopinventorypreviewpanel.lua	2025-12-01 09:58:12.000000000 +0000
++++ /home/cookie/gmod/serverfiles/garrysmod/addons/0020_ps2-master/lua/ps2/client/tabs/inventory_tab/cl_dpointshopinventorypreviewpanel.lua	2026-08-18 16:45:35.719544674 +0000
+@@ -9,8 +9,13 @@
+ 	if hook.Call( "PS2_InvPreviewPanelPaint", GAMEMODE, self ) == false then
+ 		return
+ 	end
+-	
+-	derma.SkinHook( "Paint", "InnerPanel", self, w, h )
++
++	-- change by cookie9216
++	if Pointshop2 and Pointshop2.DrawPreviewBackground then
++		Pointshop2.DrawPreviewBackground( w, h )
++	else
++		derma.SkinHook( "Paint", "InnerPanel", self, w, h )
++	end
+ 	
+ 	if ( !IsValid( self.Entity ) ) then return end
+ 	

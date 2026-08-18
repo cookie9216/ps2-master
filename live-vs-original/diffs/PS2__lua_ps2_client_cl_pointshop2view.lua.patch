@@ -1,0 +1,19 @@
+--- /tmp/tmp.2S5MPfCRGI/lua/ps2/client/cl_pointshop2view.lua	2025-12-01 09:58:12.000000000 +0000
++++ /home/cookie/gmod/serverfiles/garrysmod/addons/0020_ps2-master/lua/ps2/client/cl_pointshop2view.lua	2026-08-18 16:45:35.711543916 +0000
+@@ -460,12 +460,13 @@
+ 
+ function Pointshop2View:RegenerateIcons( )
+     for _, itemClass in pairs( Pointshop2:GetRegisteredItems( ) ) do
+-        if not derma.Controls[itemClass:GetPointshopIconControl()] then
+-            print(itemClass:GetPointshopIconControl())
++        -- change by cookie9216
++        local ctrlName = itemClass:GetPointshopIconControl()
++        if not derma.Controls[ctrlName] then
+             continue
+         end
+ 
+-         if LibK.DermaInherits( itemClass:GetPointshopIconControl(), "DCsgoItemIcon" ) then
++        if LibK and LibK.DermaInherits and LibK.DermaInherits( ctrlName, "DCsgoItemIcon" ) then
+             Pointshop2.RequestIcon( itemClass, true )
+         end
+     end

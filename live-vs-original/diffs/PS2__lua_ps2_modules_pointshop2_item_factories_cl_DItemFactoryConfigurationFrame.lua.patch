@@ -1,0 +1,16 @@
+--- /tmp/tmp.2S5MPfCRGI/lua/ps2/modules/pointshop2/item_factories/cl_DItemFactoryConfigurationFrame.lua	2025-12-01 09:58:12.000000000 +0000
++++ /home/cookie/gmod/serverfiles/garrysmod/addons/0020_ps2-master/lua/ps2/modules/pointshop2/item_factories/cl_DItemFactoryConfigurationFrame.lua	2026-08-18 16:45:35.734546094 +0000
+@@ -57,4 +57,12 @@
+ function PANEL:OnFinish( settings )
+ end
+ 
++function PANEL:Paint( w, h )
++	-- change by cookie9216
++	if Pointshop2 and Pointshop2.DrawPopupPanelBackground then
++		Pointshop2.DrawPopupPanelBackground( w, h )
++		return true
++	end
++end
++
+ vgui.Register( "DItemFactoryConfigurationFrame", PANEL, "DFrame" )
+\ No newline at end of file

@@ -1,0 +1,51 @@
+--- /tmp/tmp.2S5MPfCRGI/lua/ps2/client/tabs/management_tab/settings/cl_dsettingspanel.lua	2025-12-01 09:58:12.000000000 +0000
++++ /home/cookie/gmod/serverfiles/garrysmod/addons/0020_ps2-master/lua/ps2/client/tabs/management_tab/settings/cl_dsettingspanel.lua	2026-08-18 16:45:35.717544484 +0000
+@@ -15,11 +15,14 @@
+ end
+ 
+ function PANEL:SetData( data )
+-	self.settings = data
++	-- change by cookie9216
++	self.settings = istable(data) and data or {}
+ 	self:InitSettings( )
+ end
+ 
+ function PANEL:InitSettings( )
++	-- change by cookie9216
++	if not istable(self.settings) then return end
+ 	for path, value in pairs( self.settings ) do
+ 		if self.settingsLookup[path] then
+ 			self.settingsLookup[path]:SetValue( value )
+@@ -31,6 +34,32 @@
+ 	self.settings[path] = value
+ end
+ 
++-- change by cookie9216
++function PANEL:CollectSettings( )
++	local out = {}
++	if istable( self.settings ) then
++		for path, value in pairs( self.settings ) do
++			out[path] = value
++		end
++	end
++	for path, panel in pairs( self.settingsLookup or {} ) do
++		if not IsValid( panel ) then continue end
++		if IsValid( panel.container ) and IsValid( panel.container.checkbox ) then
++			out[path] = panel.container.checkbox:GetChecked() == true
++		elseif IsValid( panel.numberWang ) then
++			out[path] = tonumber( panel.numberWang:GetValue() ) or 0
++		elseif IsValid( panel.textEntry ) then
++			out[path] = panel.textEntry:GetValue()
++		elseif IsValid( panel.combobox ) then
++			out[path] = panel.combobox:GetSelected() or panel.combobox:GetValue()
++		elseif IsValid( panel.radiobox ) and panel.radiobox.GetSelectedOption then
++			local opt = panel.radiobox:GetSelectedOption()
++			if IsValid( opt ) then out[path] = opt:GetText() end
++		end
++	end
++	return out
++end
++
+ function PANEL:AutoAddSettingsTable( tbl, settingListener )
+ 	settingListener = settingListener or self
+ 	

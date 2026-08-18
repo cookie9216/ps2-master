@@ -1,0 +1,11 @@
+--- /tmp/tmp.2S5MPfCRGI/lua/kinv/items/pointshop/sh_base_playermodel.lua	2025-12-01 09:58:12.000000000 +0000
++++ /home/cookie/gmod/serverfiles/garrysmod/addons/0020_ps2-master/lua/kinv/items/pointshop/sh_base_playermodel.lua	2026-08-18 16:45:35.708543632 +0000
+@@ -58,7 +58,7 @@
+ 
+ function ITEM:OnHolster( )
+ 	local ply = self:GetOwner( )
+-	dp("on holster", ply)
++	-- change by cookie9216
+ 	timer.Simple( 0, function( )
+ 		hook.Run( "PlayerSetModel", ply )
+ 		hook.Run( "PS2_DoUpdatePreviewModel" )

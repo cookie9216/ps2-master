@@ -1,0 +1,75 @@
+--- /tmp/tmp.2S5MPfCRGI/lua/ps2/client/tabs/inventory_tab/cl_dpointshopplayerselect.lua	2025-12-01 09:58:12.000000000 +0000
++++ /home/cookie/gmod/serverfiles/garrysmod/addons/0020_ps2-master/lua/ps2/client/tabs/inventory_tab/cl_dpointshopplayerselect.lua	2026-08-18 16:45:35.718544579 +0000
+@@ -39,6 +39,8 @@
+ 	end
+ 	
+ 	function panel.DoClick( )
++		-- change by cookie9216
++		if not IsValid( ply ) then return end
+ 		self:SelectPlayer( ply )
+ 	end
+ 	
+@@ -51,11 +53,16 @@
+ end
+ 
+ function PANEL:SelectPlayer( ply )
++	-- change by cookie9216
++	if not IsValid( ply ) then
++		return
++	end
+ 	if IsValid( self.selectedPanel ) and ply == self.selectedPanel.player then
+ 		return 
+ 	end
+ 	
+ 	for k, v in pairs( self.playerLookup ) do
++		if not IsValid( v ) then continue end
+ 		local isSelected = v.player == ply
+ 		v.Selected = isSelected
+ 		if isSelected then
+@@ -66,12 +73,17 @@
+ end
+ 
+ function PANEL:RemovePanelFor( ply )
+-	if self.playerLookup[ply].Selected then
++	-- change by cookie9216
++	local panel = self.playerLookup[ply]
++	if not IsValid( panel ) then
++		self.playerLookup[ply] = nil
++		return
++	end
++	if panel.Selected then
+ 		self.selectedPanel = nil
+-		self:OnChange( )
++		self:OnChange( nil )
+ 	end
+-	
+-	self.playerLookup[ply]:Remove( )
++	panel:Remove( )
+ 	self.playerLookup[ply] = nil
+ 	self.playersContainer:InvalidateLayout( )
+ end
+@@ -83,13 +95,22 @@
+ 			not table.HasValue( self.players, v.player ) 
+ 		then
+ 			v:Remove( )
+-			self.playerLookup[v] = nil
++			-- change by cookie9216
++			if IsValid( v.player ) then
++				self.playerLookup[v.player] = nil
++			else
++				for ply, panel in pairs( self.playerLookup ) do
++					if panel == v or not IsValid( ply ) then
++						self.playerLookup[ply] = nil
++					end
++				end
++			end
+ 		end
+ 	end
+ 	
+ 	--Add added
+ 	for k, v in pairs( self.players ) do
+-		if not IsValid( self.playerLookup[v] ) then
++		if IsValid( v ) and not IsValid( self.playerLookup[v] ) then
+ 			self:AddPlayer( v )
+ 		end
+ 	end

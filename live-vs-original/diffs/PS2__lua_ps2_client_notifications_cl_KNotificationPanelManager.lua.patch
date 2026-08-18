@@ -1,0 +1,46 @@
+--- /tmp/tmp.2S5MPfCRGI/lua/ps2/client/notifications/cl_KNotificationPanelManager.lua	2025-12-01 09:58:12.000000000 +0000
++++ /home/cookie/gmod/serverfiles/garrysmod/addons/0020_ps2-master/lua/ps2/client/notifications/cl_KNotificationPanelManager.lua	2026-08-18 16:45:35.719544674 +0000
+@@ -1,17 +1,22 @@
+ local PANEL = {}
+ 
+ function PANEL:Init( )
+-	self:SetSkin( Pointshop2.Config.DermaSkin )
++	self:SetSkin( Pointshop2.Config and Pointshop2.Config.DermaSkin or "Default" )
+ 
+ 	self.notifications = {}
+ 	self.stackDirection = 8 --numpad arrows
+ 	self.notificationsWaiting = {} --queue
+ 	self.notifications = {}
+ 	
++	-- change by cookie9216
++	self.slideInDuration = 0.5
++	
+ 	self.lblTitle = vgui.Create( "DLabel", self )
+ 	self.lblTitle:DockMargin( 3, 3, 3, 3 )
+ 	self.lblTitle:Dock( TOP )
+-	self.lblTitle:SetFont( self:GetSkin( ).TabFont )
++	-- change by cookie9216
++	local titleSkin = self:GetSkin( ) or {}
++	self.lblTitle:SetFont( titleSkin.TabFont or titleSkin.TextFont or titleSkin.fontName or "DermaDefault" )
+ 	self.lblTitle:SetText( " Pointshop 2" )
+ 	self.lblTitle:SetColor( color_white )
+ 	self.lblTitle:SizeToContents( )
+@@ -19,7 +24,7 @@
+ 	
+ 	self.panelSlidingIn = false
+ 	self.slidingStarted = 0
+-	self.slideInDuration = 0.5 --1/2 second
++	self.slideInDuration = self.slideInDuration or 0.5 --1/2 second
+ 	
+ 	--If no notifications are left, fade self out
+ 	self.fadedOut = false
+@@ -110,7 +115,8 @@
+ 	end
+ 	
+ 	--Position the rest
+-	local y = self.lblTitle:GetTall( ) + 3
++	-- change by cookie9216
++	local y = IsValid(self.lblTitle) and (self.lblTitle:GetTall() + 3) or 3
+ 	for k, notificationPanel in pairs( self.notifications ) do
+ 		if CurTime( ) > notificationPanel.slideOutStart then
+ 			if CurTime( ) > notificationPanel.slideOutStart + self.slideInDuration then

@@ -1,0 +1,22 @@
+--- /tmp/tmp.2S5MPfCRGI/lua/ps2/client/notifications/cl_KNotificationPanel.lua	2025-12-01 09:58:12.000000000 +0000
++++ /home/cookie/gmod/serverfiles/garrysmod/addons/0020_ps2-master/lua/ps2/client/notifications/cl_KNotificationPanel.lua	2026-08-18 16:45:35.720544768 +0000
+@@ -1,7 +1,7 @@
+ local PANEL = {}
+ 
+ function PANEL:Init( )
+-	self:SetSkin( Pointshop2.Config.DermaSkin )
++	self:SetSkin( Pointshop2.Config and Pointshop2.Config.DermaSkin or "Default" )
+ 	
+ 	self.iconContainer = vgui.Create( "DPanel", self )
+ 	self.iconContainer:DockMargin( 5, 5, 5, 5 )
+@@ -13,7 +13,9 @@
+ 	self.icon:Dock( TOP )
+ 	
+ 	self.descriptionLabel = vgui.Create( "DMultilineLabel", self )
+-	self.descriptionLabel.font = self:GetSkin( ).TextFont
++	-- change by cookie9216
++	local notifySkin = self:GetSkin( ) or {}
++	self.descriptionLabel.font = notifySkin.TextFont or notifySkin.fontName or "DermaDefault"
+ 	self.descriptionLabel:DockMargin( 5, 5, 5, 5 )
+ 	self.descriptionLabel:Dock( TOP )
+ 
